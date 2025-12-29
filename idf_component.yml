@@ -1,4 +1,4 @@
 description: Echo Base Control Component - UART-based communication for echo base
   device control
 license: Apache-2.0
-version: 0.0.3~1
+version: 0.0.3~2

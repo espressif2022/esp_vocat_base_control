@@ -27,9 +27,9 @@ extern "C" {
 
 #define ECHO_BASE_CMD_SET_CALIBRATE                   0x03
 //sub commands for ECHO_BASE_CMD_SET_CALIBRATE
-#define ECHO_BASE_CMD_RECV_CALIBRATE_START             0x0010
-#define ECHO_BASE_CMD_RECV_CALIBRATE_STEP1             0x0011
-#define ECHO_BASE_CMD_RECV_CALIBRATE_STEP2             0x0012
+#define ECHO_BASE_CMD_RECV_CALIBRATE_START             0x0011
+#define ECHO_BASE_CMD_RECV_CALIBRATE_STEP1             0x0012
+#define ECHO_BASE_CMD_RECV_CALIBRATE_STEP2             0x0013
 
 // Command codes - Receive
 #define ECHO_BASE_CMD_RECV_SLIDE_SWITCH               0x03
