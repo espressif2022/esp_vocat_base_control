@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
-#include "echo_base_control.h"
+#include "vocat_base_control.h"
 
 // ============================================================================
 // Macros
@@ -43,22 +43,22 @@ typedef struct {
     QueueHandle_t uart_queue;
     TaskHandle_t uart_task_handle;
     uint32_t rx_buffer_size;
-    echo_base_control_cmd_callback_t cmd_cb;
+    vocat_base_control_cmd_callback_t cmd_cb;
     void *user_ctx;
-} echo_base_control_ctx_t;
+} vocat_base_control_ctx_t;
 
 // ============================================================================
 // Function Declarations
 // ============================================================================
 
-static esp_err_t echo_base_control_send_command_frame(uint8_t cmd, uint16_t data);
-static void echo_base_control_uart_receive_task(void *pvParameters);
-static bool echo_base_control_parse_response_frame(uint8_t *frame, int frame_len, uint8_t *cmd, uint8_t **data, int *data_len);
-static echo_base_control_ctx_t *echo_base_control_get_ctx(void);
-static void echo_base_control_reset_frame_sync(bool *frame_sync, int *frame_index, int *expected_frame_len);
-static bool echo_base_control_process_frame_byte(uint8_t byte, uint8_t *frame_buffer, bool *frame_sync, 
+static esp_err_t vocat_base_control_send_command_frame(uint8_t cmd, uint16_t data);
+static void vocat_base_control_uart_receive_task(void *pvParameters);
+static bool vocat_base_control_parse_response_frame(uint8_t *frame, int frame_len, uint8_t *cmd, uint8_t **data, int *data_len);
+static vocat_base_control_ctx_t *vocat_base_control_get_ctx(void);
+static void vocat_base_control_reset_frame_sync(bool *frame_sync, int *frame_index, int *expected_frame_len);
+static bool vocat_base_control_process_frame_byte(uint8_t byte, uint8_t *frame_buffer, bool *frame_sync, 
                                                   int *frame_index, int *expected_frame_len);
-static void echo_base_control_handle_complete_frame(echo_base_control_ctx_t *ctx, uint8_t *frame_buffer, 
+static void vocat_base_control_handle_complete_frame(vocat_base_control_ctx_t *ctx, uint8_t *frame_buffer, 
                                                      int expected_frame_len, bool *frame_sync, 
                                                      int *frame_index);
 
@@ -72,26 +72,26 @@ static const char *TAG = "EchoBase";
 // Global Variables
 // ============================================================================
 
-static echo_base_control_ctx_t *s_echo_base_control_ctx = NULL;
+static vocat_base_control_ctx_t *s_vocat_base_control_ctx = NULL;
 
-static echo_base_control_ctx_t *echo_base_control_get_ctx(void)
+static vocat_base_control_ctx_t *vocat_base_control_get_ctx(void)
 {
-    return s_echo_base_control_ctx;
+    return s_vocat_base_control_ctx;
 }
 
-esp_err_t echo_base_control_init(const echo_base_control_config_t *config)
+esp_err_t vocat_base_control_init(const vocat_base_control_config_t *config)
 {
     if (config == NULL) {
         ESP_LOGE(TAG, "Config is NULL");
         return ESP_ERR_INVALID_ARG;
     }
 
-    if (s_echo_base_control_ctx != NULL) {
+    if (s_vocat_base_control_ctx != NULL) {
         ESP_LOGW(TAG, "Echo base control already initialized");
         return ESP_ERR_INVALID_STATE;
     }
 
-    echo_base_control_ctx_t *ctx = (echo_base_control_ctx_t *)calloc(1, sizeof(echo_base_control_ctx_t));
+    vocat_base_control_ctx_t *ctx = (vocat_base_control_ctx_t *)calloc(1, sizeof(vocat_base_control_ctx_t));
     if (ctx == NULL) {
         ESP_LOGE(TAG, "Failed to allocate context");
         return ESP_ERR_NO_MEM;
@@ -136,7 +136,7 @@ esp_err_t echo_base_control_init(const echo_base_control_config_t *config)
 
     char task_name[16];
     snprintf(task_name, sizeof(task_name), "uart_rx_%d", ctx->uart_num);
-    BaseType_t task_ret = xTaskCreate(echo_base_control_uart_receive_task, task_name, UART_TASK_STACK_SIZE, ctx, 10, &ctx->uart_task_handle);
+    BaseType_t task_ret = xTaskCreate(vocat_base_control_uart_receive_task, task_name, UART_TASK_STACK_SIZE, ctx, 10, &ctx->uart_task_handle);
     if (task_ret != pdPASS) {
         ESP_LOGE(TAG, "Failed to create UART receive task");
         uart_driver_delete(ctx->uart_num);
@@ -147,14 +147,14 @@ esp_err_t echo_base_control_init(const echo_base_control_config_t *config)
     ESP_LOGI(TAG, "Echo base control initialized: UART%d, TX=%d, RX=%d, Baud=%d", 
              ctx->uart_num, config->tx_pin, config->rx_pin, uart_config.baud_rate);
 
-    s_echo_base_control_ctx = ctx;
+    s_vocat_base_control_ctx = ctx;
 
     return ESP_OK;
 }
 
-static esp_err_t echo_base_control_send_command_frame(uint8_t cmd, uint16_t data)
+static esp_err_t vocat_base_control_send_command_frame(uint8_t cmd, uint16_t data)
 {
-    echo_base_control_ctx_t *ctx = echo_base_control_get_ctx();
+    vocat_base_control_ctx_t *ctx = vocat_base_control_get_ctx();
     if (ctx == NULL) {
         ESP_LOGE(TAG, "Echo base control not initialized");
         return ESP_ERR_INVALID_STATE;
@@ -181,25 +181,25 @@ static esp_err_t echo_base_control_send_command_frame(uint8_t cmd, uint16_t data
     return ESP_OK;
 }
 
-esp_err_t echo_base_control_set_angle(int angle)
+esp_err_t vocat_base_control_set_angle(int angle)
 {
     ESP_LOGI(TAG, "Set echo base angle: %d", angle);
-    return echo_base_control_send_command_frame(ECHO_BASE_CMD_SET_ANGLE, angle);
+    return vocat_base_control_send_command_frame(VOCAT_BASE_CMD_SET_ANGLE, angle);
 }
 
-esp_err_t echo_base_control_set_action(int action)
+esp_err_t vocat_base_control_set_action(int action)
 {
     ESP_LOGI(TAG, "Set echo base action: %d", action);
-    return echo_base_control_send_command_frame(ECHO_BASE_CMD_SET_ACTION, action);
+    return vocat_base_control_send_command_frame(VOCAT_BASE_CMD_SET_ACTION, action);
 }
 
-esp_err_t echo_base_control_set_calibrate(void)
+esp_err_t vocat_base_control_set_calibrate(void)
 {
     ESP_LOGI(TAG, "Set echo base calibrate");
-    return echo_base_control_send_command_frame(ECHO_BASE_CMD_SET_CALIBRATE, 0x10);
+    return vocat_base_control_send_command_frame(VOCAT_BASE_CMD_SET_CALIBRATE, 0x10);
 }
 
-static bool echo_base_control_parse_response_frame(uint8_t *frame, int frame_len, uint8_t *cmd, uint8_t **data, int *data_len)
+static bool vocat_base_control_parse_response_frame(uint8_t *frame, int frame_len, uint8_t *cmd, uint8_t **data, int *data_len)
 {
     if (frame_len < FRAME_MIN_SIZE) {
         ESP_LOGW(TAG, "Frame too short: %d < %d", frame_len, FRAME_MIN_SIZE);
@@ -242,7 +242,7 @@ static bool echo_base_control_parse_response_frame(uint8_t *frame, int frame_len
     return true;
 }
 
-static void echo_base_control_reset_frame_sync(bool *frame_sync, int *frame_index, int *expected_frame_len)
+static void vocat_base_control_reset_frame_sync(bool *frame_sync, int *frame_index, int *expected_frame_len)
 {
     *frame_sync = false;
     *frame_index = 0;
@@ -251,7 +251,7 @@ static void echo_base_control_reset_frame_sync(bool *frame_sync, int *frame_inde
     }
 }
 
-static bool echo_base_control_process_frame_byte(uint8_t byte, uint8_t *frame_buffer, bool *frame_sync, 
+static bool vocat_base_control_process_frame_byte(uint8_t byte, uint8_t *frame_buffer, bool *frame_sync, 
                                                   int *frame_index, int *expected_frame_len)
 {
     if (!*frame_sync) {
@@ -268,7 +268,7 @@ static bool echo_base_control_process_frame_byte(uint8_t byte, uint8_t *frame_bu
 
     if (*frame_index == 2) {
         if (byte != FRAME_HEADER_2) {
-            echo_base_control_reset_frame_sync(frame_sync, frame_index, expected_frame_len);
+            vocat_base_control_reset_frame_sync(frame_sync, frame_index, expected_frame_len);
             if (byte == FRAME_HEADER_1) {
                 frame_buffer[0] = byte;
                 *frame_index = 1;
@@ -282,7 +282,7 @@ static bool echo_base_control_process_frame_byte(uint8_t byte, uint8_t *frame_bu
         uint16_t data_length = (frame_buffer[2] << 8) | frame_buffer[3];
         if (data_length == 0 || data_length > (FRAME_MAX_SIZE - FRAME_MIN_SIZE)) {
             ESP_LOGW(TAG, "Invalid data length: %d", data_length);
-            echo_base_control_reset_frame_sync(frame_sync, frame_index, expected_frame_len);
+            vocat_base_control_reset_frame_sync(frame_sync, frame_index, expected_frame_len);
             if (byte == FRAME_HEADER_1) {
                 frame_buffer[0] = byte;
                 *frame_index = 1;
@@ -294,7 +294,7 @@ static bool echo_base_control_process_frame_byte(uint8_t byte, uint8_t *frame_bu
         *expected_frame_len = FRAME_HEADER_SIZE + FRAME_LENGTH_SIZE + data_length + FRAME_CHECKSUM_SIZE;
         if (*expected_frame_len > FRAME_MAX_SIZE) {
             ESP_LOGW(TAG, "Frame too large: %d", *expected_frame_len);
-            echo_base_control_reset_frame_sync(frame_sync, frame_index, expected_frame_len);
+            vocat_base_control_reset_frame_sync(frame_sync, frame_index, expected_frame_len);
             return false;
         }
         return false;
@@ -307,7 +307,7 @@ static bool echo_base_control_process_frame_byte(uint8_t byte, uint8_t *frame_bu
     return false;
 }
 
-static void echo_base_control_handle_complete_frame(echo_base_control_ctx_t *ctx, uint8_t *frame_buffer, 
+static void vocat_base_control_handle_complete_frame(vocat_base_control_ctx_t *ctx, uint8_t *frame_buffer, 
                                                      int expected_frame_len, bool *frame_sync, 
                                                      int *frame_index)
 {
@@ -315,7 +315,7 @@ static void echo_base_control_handle_complete_frame(echo_base_control_ctx_t *ctx
     uint8_t *data = NULL;
     int data_len = 0;
 
-    if (echo_base_control_parse_response_frame(frame_buffer, expected_frame_len, &cmd, &data, &data_len)) {
+    if (vocat_base_control_parse_response_frame(frame_buffer, expected_frame_len, &cmd, &data, &data_len)) {
         if (ctx->cmd_cb) {
             ctx->cmd_cb(cmd, data, data_len, ctx->user_ctx);
         } else {
@@ -325,12 +325,12 @@ static void echo_base_control_handle_complete_frame(echo_base_control_ctx_t *ctx
         ESP_LOGW(TAG, "Failed to parse frame");
     }
 
-    echo_base_control_reset_frame_sync(frame_sync, frame_index, NULL);
+    vocat_base_control_reset_frame_sync(frame_sync, frame_index, NULL);
 }
 
-static void echo_base_control_uart_receive_task(void *pvParameters)
+static void vocat_base_control_uart_receive_task(void *pvParameters)
 {
-    echo_base_control_ctx_t *ctx = (echo_base_control_ctx_t *)pvParameters;
+    vocat_base_control_ctx_t *ctx = (vocat_base_control_ctx_t *)pvParameters;
     if (ctx == NULL) {
         ESP_LOGE(TAG, "Invalid context in UART receive task");
         vTaskDelete(NULL);
@@ -360,10 +360,10 @@ static void echo_base_control_uart_receive_task(void *pvParameters)
                         int len = uart_read_bytes(ctx->uart_num, rx_buffer, event.size, portMAX_DELAY);
                         if (len > 0) {
                             for (int i = 0; i < len; i++) {
-                                if (echo_base_control_process_frame_byte(rx_buffer[i], frame_buffer, 
+                                if (vocat_base_control_process_frame_byte(rx_buffer[i], frame_buffer, 
                                                                           &frame_sync, &frame_index, 
                                                                           &expected_frame_len)) {
-                                    echo_base_control_handle_complete_frame(ctx, frame_buffer, 
+                                    vocat_base_control_handle_complete_frame(ctx, frame_buffer, 
                                                                              expected_frame_len, 
                                                                              &frame_sync, &frame_index);
                                 }
@@ -375,23 +375,23 @@ static void echo_base_control_uart_receive_task(void *pvParameters)
                     ESP_LOGW(TAG, "UART FIFO overflow");
                     uart_flush_input(ctx->uart_num);
                     xQueueReset(ctx->uart_queue);
-                    echo_base_control_reset_frame_sync(&frame_sync, &frame_index, &expected_frame_len);
+                    vocat_base_control_reset_frame_sync(&frame_sync, &frame_index, &expected_frame_len);
                     break;
                 case UART_BUFFER_FULL:
                     ESP_LOGW(TAG, "UART buffer full");
                     uart_flush_input(ctx->uart_num);
                     xQueueReset(ctx->uart_queue);
-                    echo_base_control_reset_frame_sync(&frame_sync, &frame_index, &expected_frame_len);
+                    vocat_base_control_reset_frame_sync(&frame_sync, &frame_index, &expected_frame_len);
                     break;
                 case UART_BREAK:
                     break;
                 case UART_PARITY_ERR:
                     ESP_LOGW(TAG, "UART parity error");
-                    echo_base_control_reset_frame_sync(&frame_sync, &frame_index, &expected_frame_len);
+                    vocat_base_control_reset_frame_sync(&frame_sync, &frame_index, &expected_frame_len);
                     break;
                 case UART_FRAME_ERR:
                     ESP_LOGW(TAG, "UART frame error");
-                    echo_base_control_reset_frame_sync(&frame_sync, &frame_index, &expected_frame_len);
+                    vocat_base_control_reset_frame_sync(&frame_sync, &frame_index, &expected_frame_len);
                     break;
                 default:
                     ESP_LOGD(TAG, "UART event type: %d", event.type);
@@ -405,9 +405,9 @@ static void echo_base_control_uart_receive_task(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-esp_err_t echo_base_control_deinit(void)
+esp_err_t vocat_base_control_deinit(void)
 {
-    echo_base_control_ctx_t *ctx = echo_base_control_get_ctx();
+    vocat_base_control_ctx_t *ctx = vocat_base_control_get_ctx();
     if (ctx == NULL) {
         ESP_LOGE(TAG, "Echo base control not initialized");
         return ESP_ERR_INVALID_STATE;
@@ -424,7 +424,7 @@ esp_err_t echo_base_control_deinit(void)
     }
 
     free(ctx);
-    s_echo_base_control_ctx = NULL;
+    s_vocat_base_control_ctx = NULL;
 
     ESP_LOGI(TAG, "Echo base control deinitialized");
     return ESP_OK;
