@@ -1,16 +1,16 @@
-# Echoear Base Control Component
+# esp_vocat Base Control Component
 
-**ESP-IDF 组件 - Echoear 底座控制上位机**
+**ESP-IDF 组件 - esp_vocat 底座控制上位机**
 
 ## 项目定位
 
-本组件是 **Echoear 底座的控制上位机组件**，运行在主控设备（如 ESP32）上，通过 UART 与底座进行通信，实现对底座的角度、动作和校准等功能的控制。
+本组件是 **esp_vocat 底座的控制上位机组件**，运行在主控设备（如 ESP32）上，通过 UART 与底座进行通信，实现对底座的角度、动作和校准等功能的控制。
 
 ### 架构说明
 
 ```
 ┌─────────────────┐         UART          ┌─────────────────┐
-│   主控设备       │  ←────────────────→   │   Echoear 底座   │
+│   主控设备       │  ←────────────────→   │   esp_vocat 底座   │
 │ (上位机/本组件)  │                       │   (下位机固件)   │
 └─────────────────┘                       └─────────────────┘
 ```
@@ -19,8 +19,8 @@
 - **下位机（底座固件）：** 运行在底座设备上，接收命令并执行相应动作
 
 > **相关项目：**  
-> 📦 **底座固件项目：** [esp-echoear-base](https://gitee.com/esp-friends/esp-echoear-base/blob/master/README_CN.md)  
-> 📦 **控制上位机组件：** echoear_base_control（当前仓库）
+> 📦 **底座固件项目：** [esp-vocat-base](https://gitee.com/esp-friends/esp-vocat-base/blob/master/README_CN.md)
+> 📦 **控制上位机组件：** esp_vocat_base_control（当前仓库）
 
 ## 功能特性
 
@@ -57,32 +57,32 @@
 
 ### 项目链接
 
-- 📦 **底座固件项目（下位机）：** [esp-echoear-base](https://gitee.com/esp-friends/esp-echoear-base/blob/master/README_CN.md)
-- 📦 **控制上位机组件（本仓库）：** echoear_base_control
+- 📦 **底座固件项目（下位机）：** [esp-vocat-base](https://gitee.com/esp-friends/esp-vocat-base/blob/master/README_CN.md)
+- 📦 **控制上位机组件（本仓库）：** esp_vocat_base_control
 
 ## 使用指南
 
 ### 初始化
 
 ```c
-#include "echo_base_control.h"
+#include "vocat_base_control.h"
 
 // 命令响应回调函数
 void cmd_callback(uint8_t cmd, uint8_t *data, int data_len, void *user_ctx)
 {
     switch (cmd) {
-        case ECHO_BASE_CMD_RECV_SLIDE_SWITCH:
+        case VOCAT_BASE_CMD_RECV_SLIDE_SWITCH:
             // 处理滑动开关事件
             if (data_len >= 2) {
                 uint16_t event = (data[0] << 8) | data[1];
                 ESP_LOGI("APP", "Slide switch event: 0x%04X", event);
             }
             break;
-        case ECHO_BASE_CMD_RECV_ACTION:
+        case VOCAT_BASE_CMD_RECV_ACTION:
             // 处理动作完成通知
             ESP_LOGI("APP", "Action completed");
             break;
-        case ECHO_BASE_CMD_RECV_HEARTBEAT:
+        case VOCAT_BASE_CMD_RECV_HEARTBEAT:
             // 处理心跳
             ESP_LOGI("APP", "Base heartbeat received");
             break;
@@ -93,7 +93,7 @@ void cmd_callback(uint8_t cmd, uint8_t *data, int data_len, void *user_ctx)
 }
 
 // 配置并初始化
-echo_base_control_config_t config = {
+vocat_base_control_config_t config = {
     .uart_num = UART_NUM_1,
     .tx_pin = GPIO_NUM_5,
     .rx_pin = GPIO_NUM_4,
@@ -103,7 +103,7 @@ echo_base_control_config_t config = {
     .user_ctx = NULL,         // 用户上下文
 };
 
-esp_err_t ret = echo_base_control_init(&config);
+esp_err_t ret = vocat_base_control_init(&config);
 if (ret != ESP_OK) {
     ESP_LOGE("APP", "Failed to initialize echo base control");
     return;
@@ -114,68 +114,71 @@ if (ret != ESP_OK) {
 
 ```c
 // 设置角度到 180 度
-echo_base_control_set_angle(180);
+vocat_base_control_set_angle(180);
 ```
 
 ### 动作控制
 
 ```c
 // 执行摇头动作
-echo_base_control_set_action(ECHO_BASE_CMD_SET_ACTION_SHARK_HEAD);
+vocat_base_control_set_action(VOCAT_BASE_CMD_SET_ACTION_SHARK_HEAD);
 
 // 执行左顾右盼动作
-echo_base_control_set_action(ECHO_BASE_CMD_SET_ACTION_LOOK_AROUND);
+vocat_base_control_set_action(VOCAT_BASE_CMD_SET_ACTION_LOOK_AROUND);
 
 // 执行跟随节拍摇头
-echo_base_control_set_action(ECHO_BASE_CMD_SET_ACTION_BEAT_SWING);
+vocat_base_control_set_action(VOCAT_BASE_CMD_SET_ACTION_BEAT_SWING);
 
 // 执行猫蹭脸动作
-echo_base_control_set_action(ECHO_BASE_CMD_SET_ACTION_CAT_NUZZLE);
+vocat_base_control_set_action(VOCAT_BASE_CMD_SET_ACTION_CAT_NUZZLE);
 
 // 执行渐变递减摇头
-echo_base_control_set_action(ECHO_BASE_CMD_SET_ACTION_SHARK_HEAD_DECAY);
+vocat_base_control_set_action(VOCAT_BASE_CMD_SET_ACTION_SHARK_HEAD_DECAY);
 ```
 
 ### 校准功能
 
 ```c
 // 启动校准
-echo_base_control_set_calibrate();
+vocat_base_control_set_calibrate();
 ```
 
 ### 资源清理
 
 ```c
 // 清理资源
-echo_base_control_deinit();
+vocat_base_control_deinit();
 ```
 
 ## 可用动作类型
 
 | 动作常量 | 值 | 说明 |
 |---------|-----|------|
-| `ECHO_BASE_CMD_SET_ACTION_SHARK_HEAD` | 0x0000 | 摇头动作 |
-| `ECHO_BASE_CMD_SET_ACTION_SHARK_HEAD_DECAY` | 0x0001 | 渐变递减摇头 |
-| `ECHO_BASE_CMD_SET_ACTION_LOOK_AROUND` | 0x0002 | 左顾右盼 |
-| `ECHO_BASE_CMD_SET_ACTION_BEAT_SWING` | 0x0003 | 跟随节拍摇头 |
-| `ECHO_BASE_CMD_SET_ACTION_CAT_NUZZLE` | 0x0004 | 猫蹭脸动作 |
+| `VOCAT_BASE_CMD_SET_ACTION_SHARK_HEAD` | 0x0000 | 摇头动作 |
+| `VOCAT_BASE_CMD_SET_ACTION_SHARK_HEAD_DECAY` | 0x0001 | 渐变递减摇头 |
+| `VOCAT_BASE_CMD_SET_ACTION_LOOK_AROUND` | 0x0002 | 左顾右盼 |
+| `VOCAT_BASE_CMD_SET_ACTION_BEAT_SWING` | 0x0003 | 跟随节拍摇头 |
+| `VOCAT_BASE_CMD_SET_ACTION_CAT_NUZZLE` | 0x0004 | 猫蹭脸动作 |
+| `VOCAT_BASE_CMD_SET_ACTION_TURN_LEFT` | 0x0005 | 左转动作 |
+| `VOCAT_BASE_CMD_SET_ACTION_TURN_RIGHT` | 0x0006 | 右转动作 |
+| `VOCAT_BASE_CMD_SET_ACTION_TURN_STOP` | 0x0007 | 停止转动 |
 
 ## 滑动开关事件类型
 
 | 事件常量 | 值 | 说明 |
 |---------|-----|------|
-| `ECHO_BASE_CMD_RECV_SWITCH_INIT` | 0x0000 | 初始化状态 |
-| `ECHO_BASE_CMD_RECV_SWITCH_SLIDE_DOWN` | 0x0001 | 向下滑动 |
-| `ECHO_BASE_CMD_RECV_SWITCH_SLIDE_UP` | 0x0002 | 向上滑动 |
-| `ECHO_BASE_CMD_RECV_SWITCH_REMOVE_FROM_UP` | 0x0003 | 从上方移除 |
-| `ECHO_BASE_CMD_RECV_SWITCH_REMOVE_FROM_DOWN` | 0x0004 | 从下方移除 |
-| `ECHO_BASE_CMD_RECV_SWITCH_PLACE_FROM_UP` | 0x0005 | 从上方放置 |
-| `ECHO_BASE_CMD_RECV_SWITCH_PLACE_FROM_DOWN` | 0x0006 | 从下方放置 |
-| `ECHO_BASE_CMD_RECV_SWITCH_SINGLE_CLICK` | 0x0007 | 单击事件 |
-| `ECHO_BASE_CMD_RECV_SWITCH_FISH_ATTACHED` | 0x0008 | 小鱼挂件附着 |
-| `ECHO_BASE_CMD_RECV_SWITCH_FISH_DETACH` | 0x0009 | 小鱼挂件分离 |
-| `ECHO_BASE_CMD_RECV_SWITCH_PAIR_DETECT` | 0x000A | 配对检测 |
-| `ECHO_BASE_CMD_RECV_SWITCH_PAIR_CANCEL` | 0x000B | 配对取消 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_INIT` | 0x0000 | 初始化状态 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_SLIDE_DOWN` | 0x0001 | 向下滑动 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_SLIDE_UP` | 0x0002 | 向上滑动 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_REMOVE_FROM_UP` | 0x0003 | 从上方移除 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_REMOVE_FROM_DOWN` | 0x0004 | 从下方移除 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_PLACE_FROM_UP` | 0x0005 | 从上方放置 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_PLACE_FROM_DOWN` | 0x0006 | 从下方放置 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_SINGLE_CLICK` | 0x0007 | 单击事件 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_FISH_ATTACHED` | 0x0008 | 小鱼挂件附着 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_FISH_DETACH` | 0x0009 | 小鱼挂件分离 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_PAIR_DETECT` | 0x000A | 配对检测 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_PAIR_CANCEL` | 0x000B | 配对取消 |
 
 ## 命令协议
 
@@ -183,18 +186,18 @@ echo_base_control_deinit();
 
 | 命令码 | 说明 | 数据长度 |
 |--------|------|---------|
-| `ECHO_BASE_CMD_SET_ANGLE` (0x01) | 设置角度 | 2 字节 |
-| `ECHO_BASE_CMD_SET_ACTION` (0x02) | 设置动作 | 2 字节 |
-| `ECHO_BASE_CMD_SET_CALIBRATE` (0x03) | 校准 | 2 字节 |
+| `VOCAT_BASE_CMD_SET_ANGLE` (0x01) | 设置角度 | 2 字节 |
+| `VOCAT_BASE_CMD_SET_ACTION` (0x02) | 设置动作 | 2 字节 |
+| `VOCAT_BASE_CMD_SET_CALIBRATE` (0x03) | 校准 | 2 字节 |
 
 ### 接收命令（底座 → 上位机）
 
 | 命令码 | 说明 | 数据长度 |
 |--------|------|---------|
-| `ECHO_BASE_CMD_RECV_HEARTBEAT` (0x00) | 心跳 | 2 字节 |
-| `ECHO_BASE_CMD_RECV_ACTION` (0x02) | 动作完成 | 2 字节 |
-| `ECHO_BASE_CMD_RECV_SLIDE_SWITCH` (0x03) | 滑动开关事件 | 2 字节 |
-| `ECHO_BASE_CMD_RECV_PERCEPTION` (0x06) | 感知模式 | 可变 |
+| `VOCAT_BASE_CMD_RECV_HEARTBEAT` (0x00) | 心跳 | 2 字节 |
+| `VOCAT_BASE_CMD_RECV_ACTION` (0x02) | 动作完成 | 2 字节 |
+| `VOCAT_BASE_CMD_RECV_SLIDE_SWITCH` (0x03) | 滑动开关事件 | 2 字节 |
+| `VOCAT_BASE_CMD_RECV_PERCEPTION` (0x06) | 感知模式 | 可变 |
 
 ## 通信协议
 
@@ -208,5 +211,5 @@ echo_base_control_deinit();
 
 ## API 参考
 
-完整的 API 文档请参考 `include/echo_base_control.h`。
+完整的 API 文档请参考 `include/vocat_base_control.h`。
 

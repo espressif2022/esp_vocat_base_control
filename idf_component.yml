@@ -1,4 +1,4 @@
-description: Echo Base Control Component - UART-based communication for echo base
+description: esp_vocat Base Control Component - UART-based communication for esp_vocat base
   device control
 license: Apache-2.0
-version: 0.0.3~2
+version: 1.0.0
