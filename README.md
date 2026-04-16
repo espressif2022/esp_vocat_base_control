@@ -39,8 +39,9 @@
 
 - **滑动开关事件**：支持多种磁吸滑动开关事件
   - 初始化状态、上下滑动、移除/放置、单击
-  - 小鱼挂件附着/分离检测
+  - 小鱼、冰淇淋、甜甜圈挂件附着/分离检测
   - 配对检测/取消
+  - 手机前靠、底部放置等姿态检测
 - **动作完成通知**：动作执行完成回调
 - **心跳检测**：底座在线状态检测
 - **感知模式**：CSI 感知模式状态反馈
@@ -179,6 +180,17 @@ vocat_base_control_deinit();
 | `VOCAT_BASE_CMD_RECV_SWITCH_FISH_DETACH` | 0x0009 | 小鱼挂件分离 |
 | `VOCAT_BASE_CMD_RECV_SWITCH_PAIR_DETECT` | 0x000A | 配对检测 |
 | `VOCAT_BASE_CMD_RECV_SWITCH_PAIR_CANCEL` | 0x000B | 配对取消 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_ICE_CREAM_ATTACHED` | 0x000C | 冰淇淋挂件附着 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_ICE_CREAM_DETACHED` | 0x000D | 冰淇淋挂件分离 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_DONUT_ATTACHED` | 0x000E | 甜甜圈挂件附着 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_DONUT_DETACHED` | 0x000F | 甜甜圈挂件分离 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_IPHONE_LEAN_FRONT` | 0x0010 | 手机从前方靠在底座上 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_IPHONE_LEAN_FRONT_DETACHED` | 0x0011 | 手机从前方位置移开 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_IPHONE_UNDER_BASE` | 0x0012 | 手机放到底座下方 |
+| `VOCAT_BASE_CMD_RECV_SWITCH_IPHONE_UNDER_BASE_DETACHED` | 0x0013 | 手机从底座下方移开 |
+| `VOCAT_BASE_CMD_RECV_CALIBRATE_START` | 0x0081 | 校准开始通知 |
+| `VOCAT_BASE_CMD_RECV_CALIBRATE_STEP1` | 0x0082 | 校准第一阶段完成 |
+| `VOCAT_BASE_CMD_RECV_CALIBRATE_STEP2` | 0x0083 | 校准第二阶段完成 |
 
 ## 命令协议
 
@@ -197,7 +209,7 @@ vocat_base_control_deinit();
 | `VOCAT_BASE_CMD_RECV_HEARTBEAT` (0x00) | 心跳 | 2 字节 |
 | `VOCAT_BASE_CMD_RECV_ACTION` (0x02) | 动作完成 | 2 字节 |
 | `VOCAT_BASE_CMD_RECV_SLIDE_SWITCH` (0x03) | 滑动开关事件 | 2 字节 |
-| `VOCAT_BASE_CMD_RECV_PERCEPTION` (0x06) | 感知模式 | 可变 |
+| `VOCAT_BASE_CMD_RECV_PERCEPTION` (0x06) | 感知模式（预留，未实现） | 可变 |
 
 ## 通信协议
 
@@ -212,4 +224,3 @@ vocat_base_control_deinit();
 ## API 参考
 
 完整的 API 文档请参考 `include/vocat_base_control.h`。
-

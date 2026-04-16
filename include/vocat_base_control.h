@@ -15,50 +15,81 @@ extern "C" {
 #endif  /* __cplusplus */
 
 // Command codes - Send
-#define VOCAT_BASE_CMD_SET_ANGLE                       0x01
+/* VOCAT_BASE_CMD_SET_ANGLE: set base angle.
+ * Data format: uint16_t, big-endian, valid range 0~65535.
+ */
+#define VOCAT_BASE_CMD_SET_ANGLE                          0x01
 
-#define VOCAT_BASE_CMD_SET_ACTION                      0x02
-//sub commands for VOCAT_BASE_CMD_SET_ACTION
-#define VOCAT_BASE_CMD_SET_ACTION_SHARK_HEAD           0x0000  /**< Shake head action */
-#define VOCAT_BASE_CMD_SET_ACTION_SHARK_HEAD_DECAY     0x0001  /**< Gradual decreasing shake head */
-#define VOCAT_BASE_CMD_SET_ACTION_LOOK_AROUND          0x0002  /**< Look around action */
-#define VOCAT_BASE_CMD_SET_ACTION_BEAT_SWING           0x0003  /**< Beat-synchronized swing */
-#define VOCAT_BASE_CMD_SET_ACTION_CAT_NUZZLE           0x0004  /**< Cat nuzzle action */
-#define VOCAT_BASE_CMD_SET_ACTION_TURN_LEFT            0x0005  /**< Turn left action */
-#define VOCAT_BASE_CMD_SET_ACTION_TURN_RIGHT           0x0006  /**< Turn right action */
-#define VOCAT_BASE_CMD_SET_ACTION_TURN_STOP            0x0007  /**< Turn stop action */
+/* VOCAT_BASE_CMD_SET_ACTION: trigger predefined base action.
+ * Data format: uint16_t, big-endian.
+ */
+#define VOCAT_BASE_CMD_SET_ACTION                         0x02
+#define VOCAT_BASE_CMD_SET_ACTION_SHARK_HEAD              0x0000  /**< Shake head action */
+#define VOCAT_BASE_CMD_SET_ACTION_SHARK_HEAD_DECAY        0x0001  /**< Gradual decreasing shake head */
+#define VOCAT_BASE_CMD_SET_ACTION_LOOK_AROUND             0x0002  /**< Look around action */
+#define VOCAT_BASE_CMD_SET_ACTION_BEAT_SWING              0x0003  /**< Beat-synchronized swing */
+#define VOCAT_BASE_CMD_SET_ACTION_CAT_NUZZLE              0x0004  /**< Cat nuzzle action */
+#define VOCAT_BASE_CMD_SET_ACTION_TURN_LEFT               0x0005  /**< Turn left action */
+#define VOCAT_BASE_CMD_SET_ACTION_TURN_RIGHT              0x0006  /**< Turn right action */
+#define VOCAT_BASE_CMD_SET_ACTION_TURN_STOP               0x0007  /**< Turn stop action */
 
-#define VOCAT_BASE_CMD_SET_CALIBRATE                   0x03
-//sub commands for VOCAT_BASE_CMD_SET_CALIBRATE
-#define VOCAT_BASE_CMD_RECV_CALIBRATE_START             0x0011
-#define VOCAT_BASE_CMD_RECV_CALIBRATE_STEP1             0x0012
-#define VOCAT_BASE_CMD_RECV_CALIBRATE_STEP2             0x0013
+/* VOCAT_BASE_CMD_SET_CALIBRATE: start base calibration flow.
+ * Data format: uint16_t, big-endian.
+ * Sub command identifies the calibration operation to execute.
+ */
+#define VOCAT_BASE_CMD_SET_CALIBRATE                      0x03
+#define VOCAT_BASE_CMD_SET_CALIBRATE_START                0x0010  /**< Start calibration */
 
 // Command codes - Receive
-#define VOCAT_BASE_CMD_RECV_SLIDE_SWITCH               0x03
+/* VOCAT_BASE_CMD_RECV_SLIDE_SWITCH: magnetic slide switch event.
+ * Data format: uint16_t, big-endian.
+ */
+#define VOCAT_BASE_CMD_RECV_SLIDE_SWITCH                  0x03
 //sub commands for VOCAT_BASE_CMD_RECV_SLIDE_SWITCH
-#define VOCAT_BASE_CMD_RECV_SWITCH_INIT                0x0000
-#define VOCAT_BASE_CMD_RECV_SWITCH_SLIDE_DOWN          0x0001
-#define VOCAT_BASE_CMD_RECV_SWITCH_SLIDE_UP            0x0002
-#define VOCAT_BASE_CMD_RECV_SWITCH_REMOVE_FROM_UP      0x0003
-#define VOCAT_BASE_CMD_RECV_SWITCH_REMOVE_FROM_DOWN    0x0004
-#define VOCAT_BASE_CMD_RECV_SWITCH_PLACE_FROM_UP       0x0005
-#define VOCAT_BASE_CMD_RECV_SWITCH_PLACE_FROM_DOWN     0x0006
-#define VOCAT_BASE_CMD_RECV_SWITCH_SINGLE_CLICK        0x0007
-#define VOCAT_BASE_CMD_RECV_SWITCH_FISH_ATTACHED       0x0008
-#define VOCAT_BASE_CMD_RECV_SWITCH_FISH_DETACH         0x0009
-#define VOCAT_BASE_CMD_RECV_SWITCH_PAIR_DETECT         0x000A
-#define VOCAT_BASE_CMD_RECV_SWITCH_PAIR_CANCEL         0x000B
+#define VOCAT_BASE_CMD_RECV_SWITCH_INIT                   0x0000  /**< Initial switch state */
+#define VOCAT_BASE_CMD_RECV_SWITCH_SLIDE_DOWN             0x0001  /**< Slider moved down */
+#define VOCAT_BASE_CMD_RECV_SWITCH_SLIDE_UP               0x0002  /**< Slider moved up */
+#define VOCAT_BASE_CMD_RECV_SWITCH_REMOVE_FROM_UP         0x0003  /**< Slider removed from upper position */
+#define VOCAT_BASE_CMD_RECV_SWITCH_REMOVE_FROM_DOWN       0x0004  /**< Slider removed from lower position */
+#define VOCAT_BASE_CMD_RECV_SWITCH_PLACE_FROM_UP          0x0005  /**< Slider placed from upper position */
+#define VOCAT_BASE_CMD_RECV_SWITCH_PLACE_FROM_DOWN        0x0006  /**< Slider placed from lower position */
+#define VOCAT_BASE_CMD_RECV_SWITCH_SINGLE_CLICK           0x0007  /**< Single click detected */
+#define VOCAT_BASE_CMD_RECV_SWITCH_FISH_ATTACHED          0x0008  /**< Fish accessory attached */
+#define VOCAT_BASE_CMD_RECV_SWITCH_FISH_DETACH            0x0009  /**< Fish accessory detached */
+#define VOCAT_BASE_CMD_RECV_SWITCH_PAIR_DETECT            0x000A  /**< Pairing detected */
+#define VOCAT_BASE_CMD_RECV_SWITCH_PAIR_CANCEL            0x000B  /**< Pairing cancelled */
+#define VOCAT_BASE_CMD_RECV_SWITCH_ICE_CREAM_ATTACHED     0x000C  /**< Ice cream accessory attached */
+#define VOCAT_BASE_CMD_RECV_SWITCH_ICE_CREAM_DETACHED     0x000D  /**< Ice cream accessory detached */
+#define VOCAT_BASE_CMD_RECV_SWITCH_DONUT_ATTACHED         0x000E  /**< Donut accessory attached */
+#define VOCAT_BASE_CMD_RECV_SWITCH_DONUT_DETACHED         0x000F  /**< Donut accessory detached */
+#define VOCAT_BASE_CMD_RECV_SWITCH_IPHONE_LEAN_FRONT      0x0010  /**< Phone leaned on base from the front */
+#define VOCAT_BASE_CMD_RECV_SWITCH_IPHONE_LEAN_FRONT_DETACHED 0x0011  /**< Phone removed from front lean position */
+#define VOCAT_BASE_CMD_RECV_SWITCH_IPHONE_UNDER_BASE      0x0012  /**< Phone placed under the base */
+#define VOCAT_BASE_CMD_RECV_SWITCH_IPHONE_UNDER_BASE_DETACHED 0x0013  /**< Phone removed from under the base */
 
-#define VOCAT_BASE_CMD_RECV_PERCEPTION                 0x06
+//Calibration notifications reported by the base during the calibrate flow
+#define VOCAT_BASE_CMD_RECV_CALIBRATE_START               0x0081  /**< Calibration started */
+#define VOCAT_BASE_CMD_RECV_CALIBRATE_STEP1               0x0082  /**< First calibration step completed */
+#define VOCAT_BASE_CMD_RECV_CALIBRATE_STEP2               0x0083  /**< Second calibration step completed */
 
-#define VOCAT_BASE_CMD_RECV_ACTION                     0x02
+/* VOCAT_BASE_CMD_RECV_PERCEPTION: reserved, not implemented yet.
+ * Data format: variable length.
+ */
+#define VOCAT_BASE_CMD_RECV_PERCEPTION                    0x06
+
+/* VOCAT_BASE_CMD_RECV_ACTION: action status notification.
+ * Data format: uint16_t, big-endian.
+ */
+#define VOCAT_BASE_CMD_RECV_ACTION                        0x02
 //sub commands for VOCAT_BASE_CMD_RECV_ACTION
-#define VOCAT_BASE_CMD_RECV_ACTION_DONE                0x0010
+#define VOCAT_BASE_CMD_RECV_ACTION_DONE                   0x0010  /**< Action completed */
 
-#define VOCAT_BASE_CMD_RECV_HEARTBEAT                  0x00
+/* VOCAT_BASE_CMD_RECV_HEARTBEAT: base heartbeat notification.
+ * Data format: uint16_t, big-endian.
+ */
+#define VOCAT_BASE_CMD_RECV_HEARTBEAT                     0x00
 //sub commands for VOCAT_BASE_CMD_RECV_HEARTBEAT
-#define VOCAT_BASE_CMD_RECV_HEARTBEAT_ALIVE            0x0001
+#define VOCAT_BASE_CMD_RECV_HEARTBEAT_ALIVE               0x0001  /**< Base is alive */
 
 /**
  * @brief Command response callback function type
@@ -147,4 +178,3 @@ esp_err_t vocat_base_control_deinit(void);
 #ifdef __cplusplus
 }
 #endif  /* __cplusplus */
-

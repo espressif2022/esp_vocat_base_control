@@ -196,7 +196,8 @@ esp_err_t vocat_base_control_set_action(int action)
 esp_err_t vocat_base_control_set_calibrate(void)
 {
     ESP_LOGI(TAG, "Set echo base calibrate");
-    return vocat_base_control_send_command_frame(VOCAT_BASE_CMD_SET_CALIBRATE, 0x10);
+    return vocat_base_control_send_command_frame(VOCAT_BASE_CMD_SET_CALIBRATE,
+                                                 VOCAT_BASE_CMD_SET_CALIBRATE_START);
 }
 
 static bool vocat_base_control_parse_response_frame(uint8_t *frame, int frame_len, uint8_t *cmd, uint8_t **data, int *data_len)
@@ -429,4 +430,3 @@ esp_err_t vocat_base_control_deinit(void)
     ESP_LOGI(TAG, "Echo base control deinitialized");
     return ESP_OK;
 }
-
